@@ -2,7 +2,7 @@ const {Router} = require('express');
 const {check, validationResult} = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const userModel = require('../models/User');
+const User = require('../models/User');
 const router = Router();
 
 router.post(
@@ -30,14 +30,14 @@ router.post(
                 });
             }
 
-            const isUserAlreadyExists = !!await userModel.findOne({email});
+            const isUserAlreadyExists = !!await User.findOne({email});
 
             if (isUserAlreadyExists) {
                 return res.status(400).json({message: 'Oops, a user with this email already exists in our service, check the entered data.'});
             }
 
             const passwordHash = await bcrypt.hash(password, 12);
-            const user = new userModel({
+            const user = new User({
                 email,
                 username,
                 password: passwordHash,
@@ -69,7 +69,7 @@ router.post(
             }
 
             const {email, password} = req.body;
-            const currentUser = await userModel.findOne({email});
+            const currentUser = await User.findOne({email});
 
             if (!currentUser) {
                 return res.status(400).json({message: 'The user is not visible in our database, please register.'});
@@ -108,7 +108,7 @@ router.get(
             }
 
             const user = jwt.verify(token, process.env.JWT_SECRET);
-            const currentUser = await userModel.findOne({_id: user.userId});
+            const currentUser = await User.findOne({_id: user.userId});
 
             if (currentUser.banned) {
                 return res.status(401).json({message: 'You just got banned.'});

@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const userModel = require("../models/User");
+const User = require("../models/User");
 
 module.exports = async (req, res, next) => {
     try {
@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
         }
 
         const user = jwt.verify(token, process.env.JWT_SECRET);
-        const currentUser = await userModel.findOne({_id: user.userId});
+        const currentUser = await User.findOne({_id: user.userId});
 
         if (currentUser.banned) {
             res.status(401).json({message: 'You just got banned.'});
