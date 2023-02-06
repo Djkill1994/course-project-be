@@ -124,7 +124,7 @@ router.get(
                 banned: currentUser.banned,
                 email: currentUser.email,
                 avatarSrc: currentUser.avatarSrc,
-                roles: currentUser.roles,
+                role: currentUser.role,
             });
         } catch (error) {
             res.status(500).json({message: 'Refresh error', error});

@@ -6,7 +6,7 @@ const schema = new Schema({
     password: {type: String, required: true},
     banned: {type: Boolean, default: false},
     avatarSrc: {type: String},
-    roles: {type: String},
+    role: {type: String},
     collections: [
         {type: Schema.Types.ObjectId, ref: 'Collection'}
     ],

@@ -12,7 +12,7 @@ router.get('/users', authMiddleware, async (req, res) => {
             banned: user.banned,
             email: user.email,
             avatarSrc: user.avatarSrc,
-            roles: user.roles,
+            role: user.role,
         })));
     } catch (error) {
         res.status(500).json({message: 'Get users error', error});
@@ -52,7 +52,7 @@ router.post('/users/unban', authMiddleware, async (req, res) => {
 router.post('/users/appoint-admin', authMiddleware, async (req, res) => {
     try {
         const {id} = req.body;
-        await User.updateOne({_id: id}, {$set: {roles: "admin"}})
+        await User.updateOne({_id: id}, {$set: {role: "admin"}})
 
         res.status(200).json({message: 'You have appointed an admin.'});
     } catch (error) {
@@ -63,7 +63,7 @@ router.post('/users/appoint-admin', authMiddleware, async (req, res) => {
 router.post('/users/remove-admin', authMiddleware, async (req, res) => {
     try {
         const {id} = req.body;
-        await User.updateOne({_id: id}, {$set: {roles: "user"}})
+        await User.updateOne({_id: id}, {$set: {role: "user"}})
 
         res.status(200).json({message: 'You demoted admin to user.'});
     } catch (error) {

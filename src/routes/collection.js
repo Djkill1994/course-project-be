@@ -28,7 +28,8 @@ router.post(
                 name,
                 theme,
                 description,
-                imgSrc
+                imgSrc: imgSrc ? imgSrc : "https://i.pinimg.com/564x/3d/19/10/3d19108003d12745a605c400b6804cfa.jpg",
+                date: Date.now(),
             })
             await User.updateOne({_id: currentUser}, {$push: {collections: collection}})
 
