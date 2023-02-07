@@ -6,7 +6,9 @@ const schema = new Schema({
     description: {type: String, required: true},
     theme: {type: String, required: true},
     date: {type: Date, required: true},
-    // item: {type: String, required: true},
+    items: [
+        {type: Schema.Types.ObjectId, ref: 'Item'}
+    ],
     // optionalField: {type: String, required: true},
 });
 
