@@ -57,10 +57,10 @@ router.get(
     `/:id`,
     async (req, res) => {
         try {
-            const currentUser = await User.findOne({_id: jwt.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET).userId}).populate("collections");
+
             const id = req.params.id
-            const collection = await currentUser.collections
-            return res.json(collection.findOne({_id: id}));
+            const collection = await Collection.findOne({_id: id})
+            return res.json(collection);
         } catch (error) {
             res.status(500).json({message: 'Get my collection error', error});
         }
