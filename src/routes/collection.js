@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Collection = require("../models/Collection");
 const authMiddleware = require("../middlewares/auth");
+const {Schema} = require("mongoose");
 const router = Router();
 
 router.put(
@@ -45,8 +46,16 @@ router.get(
     async (req, res) => {
         try {
             const currentUser = await User.findOne({_id: jwt.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET).userId}).populate("collections");
-
-            return res.json(currentUser.collections);
+            const userCollections = currentUser.collections
+            return res.json(userCollections.map((collection) => ({
+                id: collection._id,
+                name: collection.name,
+                imgSrc: collection.imgSrc,
+                description: collection.description,
+                theme: collection.theme,
+                date: collection.date,
+                items: collection.items,
+            })));
         } catch (error) {
             res.status(500).json({message: 'Get my collections error', error});
         }
@@ -60,7 +69,15 @@ router.get(
 
             const id = req.params.id
             const collection = await Collection.findOne({_id: id})
-            return res.json(collection);
+            return res.json({
+                id: collection._id,
+                name: collection.name,
+                imgSrc: collection.imgSrc,
+                description: collection.description,
+                theme: collection.theme,
+                date: collection.date,
+                items: collection.items,
+            });
         } catch (error) {
             res.status(500).json({message: 'Get my collection error', error});
         }

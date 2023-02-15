@@ -22,7 +22,7 @@ router.post(
                 });
             }
 
-            const {email, password, username, passwordConfirm} = req.body;
+            const {email, password, userName, passwordConfirm} = req.body;
 
             if (password !== passwordConfirm) {
                 return res.status(400).json({
@@ -39,7 +39,7 @@ router.post(
             const passwordHash = await bcrypt.hash(password, 12);
             const user = new User({
                 email,
-                username,
+                userName,
                 password: passwordHash,
                 registrationDate: Date.now(),
             });
@@ -120,7 +120,7 @@ router.get(
 
             return res.json({
                 id: currentUser._id,
-                username: currentUser.username,
+                userName: currentUser.userName,
                 banned: currentUser.banned,
                 email: currentUser.email,
                 avatarSrc: currentUser.avatarSrc,
