@@ -4,7 +4,6 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Collection = require("../models/Collection");
 const authMiddleware = require("../middlewares/auth");
-const {Schema} = require("mongoose");
 const router = Router();
 
 router.put(
@@ -31,7 +30,7 @@ router.put(
                 theme,
                 description,
                 imgSrc,
-                date: Date.now(),
+                date: new Date().toLocaleString("en-US", {timeZone: "Europe/Minsk"})
             })
             await User.updateOne({_id: currentUser}, {$push: {collections: collection}})
             return res.status(200).json({message: 'Collection was created.'});

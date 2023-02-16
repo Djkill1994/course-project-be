@@ -5,7 +5,7 @@ const schema = new Schema({
     imgSrc: {type: String},
     description: {type: String, required: true},
     theme: {type: String, required: true},
-    date: {type: Date, required: true},
+    date: {type: String, required: true},
     items: [
         {type: Schema.Types.ObjectId, ref: 'Item'}
     ],
