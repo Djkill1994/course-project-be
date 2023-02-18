@@ -10,6 +10,7 @@ app.use('/api/auth', require('./src/routes/auth'));
 app.use('/api/admin', require('./src/routes/admin'));
 app.use('/api/collections', require('./src/routes/collection'));
 app.use('/api/user', require('./src/routes/user'));
+app.use('/api/items', require('./src/routes/item'));
 
 const PORT = process.env.PORT;
 

@@ -22,7 +22,7 @@ router.post(
                 });
             }
 
-            const {email, password, userName, passwordConfirm} = req.body;
+            const {email, password, userName, passwordConfirm, avatarSrc} = req.body;
 
             if (password !== passwordConfirm) {
                 return res.status(400).json({
@@ -40,8 +40,10 @@ router.post(
             const user = new User({
                 email,
                 userName,
+                avatarSrc,
                 password: passwordHash,
                 registrationDate: Date.now(),
+                // todo нужна дата регистрации ??
             });
             await user.save();
             return res.status(200).json({message: 'User was created.'});

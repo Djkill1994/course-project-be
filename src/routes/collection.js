@@ -32,7 +32,7 @@ router.put(
                 imgSrc,
                 date: new Date().toLocaleString("en-US", {timeZone: "Europe/Minsk"})
             })
-            await User.updateOne({_id: currentUser}, {$push: {collections: collection}})
+            await User.updateOne({_id: currentUser}, {$push: {collections: collection}});
             return res.status(200).json({message: 'Collection was created.'});
         } catch (error) {
             res.status(500).json({message: 'Create my collection error', error});
@@ -45,7 +45,7 @@ router.get(
     async (req, res) => {
         try {
             const currentUser = await User.findOne({_id: jwt.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET).userId}).populate("collections");
-            const userCollections = currentUser.collections
+            const userCollections = currentUser.collections;
             return res.json(userCollections.map((collection) => ({
                 id: collection._id,
                 name: collection.name,
@@ -62,12 +62,11 @@ router.get(
 );
 
 router.get(
-    `/:id`,
+    '/:id',
     async (req, res) => {
         try {
-
-            const id = req.params.id
-            const collection = await Collection.findOne({_id: id})
+            const id = req.params.id;
+            const collection = await Collection.findOne({_id: id}).populate("items");
             return res.json({
                 id: collection._id,
                 name: collection.name,
@@ -86,7 +85,7 @@ router.get(
 router.delete('/', authMiddleware, async (req, res) => {
     try {
         const {id} = req.body;
-        await Collection.deleteOne({_id: id})
+        await Collection.deleteOne({_id: id});
         res.status(200).json({message: 'Collection has been deleted.'});
     } catch (error) {
         res.status(500).json({message: 'Delete collection error', error});
