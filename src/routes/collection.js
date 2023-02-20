@@ -25,9 +25,12 @@ router.put(
 
             const currentUser = await User.findOne({_id: jwt.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET).userId});
             const {name, theme, description, imgSrc} = req.body;
+            // todo Добавить field default and option fields
             const collection = await Collection.create({
                 name,
                 theme,
+                fields: [{name: "name", type: "string"}],
+                optionalFields: [],
                 description,
                 imgSrc,
                 date: new Date().toLocaleString("en-US", {timeZone: "Europe/Minsk"})
@@ -53,14 +56,13 @@ router.get(
                 description: collection.description,
                 theme: collection.theme,
                 date: collection.date,
-                items: collection.items,
             })));
         } catch (error) {
             res.status(500).json({message: 'Get my collections error', error});
         }
     }
 );
-
+// todo Добавить field default and option fields зарефачить
 router.get(
     '/:id',
     async (req, res) => {
@@ -70,6 +72,8 @@ router.get(
             return res.json({
                 id: collection._id,
                 name: collection.name,
+                fields: collection.fields,
+                optionalFields: collection.optionalFields,
                 imgSrc: collection.imgSrc,
                 description: collection.description,
                 theme: collection.theme,

@@ -9,7 +9,8 @@ const schema = new Schema({
     items: [
         {type: Schema.Types.ObjectId, ref: 'Item'}
     ],
-    // optionalField: {type: String, required: true},
+    optionalFields: [{type: Object, required: true}],
+    fields: [{type: Object, required: true}],
 });
 
 module.exports = model('Collection', schema);

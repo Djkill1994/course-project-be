@@ -41,9 +41,8 @@ router.post(
                 email,
                 userName,
                 avatarSrc,
+                role: "user",
                 password: passwordHash,
-                registrationDate: Date.now(),
-                // todo нужна дата регистрации ??
             });
             await user.save();
             return res.status(200).json({message: 'User was created.'});

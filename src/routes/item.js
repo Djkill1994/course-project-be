@@ -1,7 +1,5 @@
 const {Router} = require('express');
 const {check, validationResult} = require('express-validator');
-const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 const Collection = require("../models/Collection");
 const Item = require("../models/Item");
 const authMiddleware = require("../middlewares/auth");
@@ -33,14 +31,37 @@ router.put(
         }
     }
 );
-// todo придумать как получпть юзера публикации
+// todo придумать как получпть юзера публикации, перенести в коллекцию роут
 router.get(
     '/all/:id',
     async (req, res) => {
         try {
             const id = req.params.id;
-            const items =  await Collection.findOne({_id: id}, ["items"]).populate("items");
+            const items = await Collection.findOne({_id: id}, ["items"]).populate("items");
             return res.json(items.items.map((item) => ({
+                id: item._id,
+                name: item.name,
+                imgSrc: item.imgSrc,
+            })));
+        } catch (error) {
+            res.status(500).json({message: 'Get my items error', error});
+        }
+    }
+);
+
+router.get(
+    '/all',
+    async (req, res) => {
+        try {
+
+            // const users = await userModel.find();
+            // res.status(200).json(users?.map((user) => ({
+            //     username: user.username,
+            // })));
+
+            const items = await Item.find();
+            console.log(items)
+            return res.json(items.map((item) => ({
                 id: item._id,
                 name: item.name,
                 imgSrc: item.imgSrc,
@@ -56,7 +77,7 @@ router.get(
     async (req, res) => {
         try {
             const id = req.params.id;
-            const item =  await Item.findOne({_id: id});
+            const item = await Item.findOne({_id: id});
             return res.json({
                 id: item._id,
                 name: item.name,
