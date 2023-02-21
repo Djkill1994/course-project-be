@@ -25,11 +25,16 @@ router.put(
 
             const currentUser = await User.findOne({_id: jwt.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET).userId});
             const {name, theme, description, imgSrc} = req.body;
-            // todo Добавить field default and option fields
             const collection = await Collection.create({
                 name,
                 theme,
-                fields: [{name: "name", type: "string"}],
+                fields: [
+                    {name: "name", type: "string", minLength: 2, maxLength: 50},
+                    {name: "images", type: "string"},
+                    {name: "comments", type: "string", minLength: 2, maxLength: 240},
+                    {name: "tags", type: "string", minLength: 2, maxLength: 50},
+                    {name: "likes", type: "string", minLength: 2, maxLength: 240},
+                ],
                 optionalFields: [],
                 description,
                 imgSrc,
@@ -62,7 +67,7 @@ router.get(
         }
     }
 );
-// todo Добавить field default and option fields зарефачить
+
 router.get(
     '/:id',
     async (req, res) => {
@@ -78,10 +83,33 @@ router.get(
                 description: collection.description,
                 theme: collection.theme,
                 date: collection.date,
-                items: collection.items,
+                items: collection.items.map((item) => ({
+                    id: item._id,
+                    name: item.name,
+                    imgSrc: item.imgSrc
+                })),
             });
         } catch (error) {
             res.status(500).json({message: 'Get my collection error', error});
+        }
+    }
+);
+
+router.get(
+    '/all/collection',
+    async (req, res) => {
+        try {
+            const collections = await Collection.find();
+            return res.json(collections.map((collection) => ({
+                id: collection._id,
+                name: collection.name,
+                imgSrc: collection.imgSrc,
+                description: collection.description,
+                theme: collection.theme,
+                date: collection.date,
+            })));
+        } catch (error) {
+            res.status(500).json({message: 'Get collections error', error});
         }
     }
 );
