@@ -1,9 +1,9 @@
 const {Schema, model} = require('mongoose');
 
 const schema = new Schema({
-    date: {type: String, required: true},
-    sender: {type: Schema.Types.ObjectId, ref: 'User'},
-    text: {type: String, required: true},
+    //todo или {type: Schema.Types.ObjectId, ref: 'User'}
+    sender: {type: String, required: true},
+    comment: {type: String, required: true},
 });
 
 module.exports = model('Comment', schema);

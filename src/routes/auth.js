@@ -29,8 +29,8 @@ router.post(
                     message: 'Sorry, but your passwords do not match, be careful.',
                 });
             }
-
-            const isUserAlreadyExists = !!await User.findOne({email});
+//todo сделать отдельно проверки и ошибки на email and userName
+            const isUserAlreadyExists = !!await User.findOne({email} && {userName});
 
             if (isUserAlreadyExists) {
                 return res.status(400).json({message: 'Oops, a user with this email already exists in our service, check the entered data.'});
