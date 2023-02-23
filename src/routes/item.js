@@ -135,12 +135,16 @@ router.put(
         try {
             const {sender, comment} = req.body;
             const id = req.params.id;
+            const userSender = await User.findOne({userName: sender})
             const comments = await Comment.create({
                 comment,
-                sender,
+                sender: {
+                    userName: userSender.userName,
+                    avatarSrc: userSender.avatarSrc,
+                },
                 date: new Date().toLocaleString("en-US", {timeZone: "Europe/Minsk"})
             })
-            console.log(comments)
+
             await Item.updateOne({_id: id}, {$push: {comments: comments}});
             return res.status(200).json({message: 'Comment was created.'});
         } catch (error) {
@@ -149,10 +153,30 @@ router.put(
     }
 );
 
+router.put('/settings/:id', authMiddleware, async (req, res) => {
+    try {
+        const id = req.params.id;
+        const {
+            name, imgSrc, tags
+        } = req.body;
+        await Item.updateMany({_id: id}, {
+            $set: {
+                name: name,
+                imgSrc: imgSrc,
+                tags: tags
+            }
+        })
+
+        res.status(200).json({message: 'You have update an item settings.'});
+    } catch (error) {
+        res.status(500).json({message: 'Update item settings error', error});
+    }
+})
+
 router.delete('/', authMiddleware, async (req, res) => {
     try {
         const {id} = req.body;
-        await Item.deleteOne({_id: id});
+        await Item.deleteMany({_id: id});
         res.status(200).json({message: 'Item has been deleted.'});
     } catch (error) {
         res.status(500).json({message: 'Delete item error', error});

@@ -86,7 +86,8 @@ router.get(
                 items: collection.items.map((item) => ({
                     id: item._id,
                     name: item.name,
-                    imgSrc: item.imgSrc
+                    imgSrc: item.imgSrc,
+                    tags: item.tags
                 })),
             });
         } catch (error) {
@@ -94,6 +95,12 @@ router.get(
         }
     }
 );
+
+// tags: item.tags.map((tag) => ({
+//     id: tag._id,
+//     tag: tag.tag
+// }))
+
 
 router.get(
     '/all/collection',
@@ -113,6 +120,27 @@ router.get(
         }
     }
 );
+
+router.put('/settings/:id', authMiddleware, async (req, res) => {
+    try {
+        const id = req.params.id;
+        const {name, fields, optionalFields, imgSrc, description, theme} = req.body;
+        await Collection.updateMany({_id: id}, {
+            $set: {
+                name: name,
+                fields: fields,
+                optionalFields: optionalFields,
+                imgSrc: imgSrc,
+                description: description,
+                theme: theme
+            }
+        })
+
+        res.status(200).json({message: 'You have update an collection settings.'});
+    } catch (error) {
+        res.status(500).json({message: 'Update collection settings error', error});
+    }
+})
 
 router.delete('/', authMiddleware, async (req, res) => {
     try {
