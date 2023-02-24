@@ -3,6 +3,7 @@ const {check, validationResult} = require('express-validator');
 const Collection = require("../models/Collection");
 const Item = require("../models/Item");
 const Tag = require("../models/Tag");
+const Like = require("../models/Like");
 const Comment = require("../models/Comment");
 const authMiddleware = require("../middlewares/auth");
 const User = require("../models/User");
@@ -45,16 +46,19 @@ router.put(
             //
             // console.log(resa)
 
-
+            const likes = await Like.create({
+                count: 0,
+                sender: []
+            })
             const item = await Item.create({
                 name,
                 imgSrc,
+                likes,
                 date: new Date().toLocaleString("en-US", {timeZone: "Europe/Minsk"})
             })
             await Collection.updateOne({_id: id}, {$push: {items: item}});
             return res.status(200).json({message: 'Item was created.'});
         } catch (error) {
-            console.log(error)
             res.status(500).json({message: 'Create my item error', error});
         }
     }
@@ -65,12 +69,16 @@ router.get(
     async (req, res) => {
         try {
             const id = req.params.id;
-            const items = await Collection.findOne({_id: id}, ["items"]).populate("items");
+            const items = await Collection.findOne({_id: id}, "items").populate("items");
+            //todo зарефачить , не получаю на фронте Likes and tags
+            console.log(items)
             return res.json(items.items.map((item) => ({
                 id: item._id,
                 name: item.name,
                 imgSrc: item.imgSrc,
+                date: item.date,
                 tags: item.tags,
+                likes: item.likes
             })));
         } catch (error) {
             res.status(500).json({message: 'Get my items error', error});
@@ -82,12 +90,14 @@ router.get(
     '/all',
     async (req, res) => {
         try {
-            const items = await Item.find();
+            const items = await Item.find().populate("likes").populate("tags");
             return res.json(items.map((item) => ({
                 id: item._id,
                 name: item.name,
                 imgSrc: item.imgSrc,
+                date: item.date,
                 tags: item.tags,
+                likes: item.likes
             })));
         } catch (error) {
             res.status(500).json({message: 'Get my items error', error});
@@ -100,13 +110,15 @@ router.get(
     async (req, res) => {
         try {
             const id = req.params.id;
-            const item = await Item.findOne({_id: id}).populate("tags").populate("comments");
+            const item = await Item.findOne({_id: id}).populate("tags").populate("comments").populate("likes");
             return res.json({
                 id: item._id,
                 name: item.name,
                 imgSrc: item.imgSrc,
+                date: item.date,
                 tags: item.tags,
-                comments: item.comments
+                comments: item.comments,
+                likes: item.likes
             });
         } catch (error) {
             res.status(500).json({message: 'Get my item error', error});
@@ -171,7 +183,39 @@ router.put('/settings/:id', authMiddleware, async (req, res) => {
     } catch (error) {
         res.status(500).json({message: 'Update item settings error', error});
     }
-})
+});
+
+router.put('/like/:id', authMiddleware, async (req, res) => {
+    try {
+        const id = req.params.id;
+        const {sender} = req.body;
+//todo зарефачить код
+        const like = await Item.findOne({_id: id}, "likes").populate("likes");
+        await Like.updateOne({_id: like.likes._id}, {$inc: {count: 1}});
+        await Like.updateOne({_id: like.likes._id}, {$push: {sender: sender}});
+
+        res.status(200).json({message: 'You have like.'});
+    } catch
+        (error) {
+        res.status(500).json({message: 'Like error', error});
+    }
+});
+
+router.put('/unLike/:id', authMiddleware, async (req, res) => {
+    try {
+        const id = req.params.id;
+        const {sender} = req.body;
+//todo зарефачить код
+        const like = await Item.findOne({_id: id}, "likes").populate("likes");
+        await Like.updateOne({_id: like.likes._id}, {$inc: {count: -1}});
+        await Like.updateOne({_id: like.likes._id}, {$unset: {sender: sender}});
+
+        res.status(200).json({message: 'You have like.'});
+    } catch
+        (error) {
+        res.status(500).json({message: 'Like error', error});
+    }
+});
 
 router.delete('/', authMiddleware, async (req, res) => {
     try {
@@ -181,6 +225,6 @@ router.delete('/', authMiddleware, async (req, res) => {
     } catch (error) {
         res.status(500).json({message: 'Delete item error', error});
     }
-})
+});
 
 module.exports = router;
