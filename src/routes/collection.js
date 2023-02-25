@@ -74,6 +74,7 @@ router.get(
         try {
             const id = req.params.id;
             const collection = await Collection.findOne({_id: id}).populate("items");
+            // todo зарефачить получение liles and tags
             return res.json({
                 id: collection._id,
                 name: collection.name,
@@ -87,7 +88,8 @@ router.get(
                     id: item._id,
                     name: item.name,
                     imgSrc: item.imgSrc,
-                    tags: item.tags
+                    tags: item.tags,
+                    likes: item.likes
                 })),
             });
         } catch (error) {

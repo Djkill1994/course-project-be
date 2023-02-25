@@ -22,7 +22,11 @@ router.put(
             }
             const {name, imgSrc, tags} = req.body;
             const id = req.params.id;
-
+            const author = await User.findOne({collections: id}, ["userName", "avatarSrc"])
+            // let user = users.find(item => item.id == 1)
+            // (
+            //     { awards: { $elemMatch: { award: "Turing Award", year: { $gt: 1980 } } } }
+            // )
             // const test = async (tag) => {
             //     !!await Tag.findOne({tag})
             // };
@@ -51,6 +55,7 @@ router.put(
                 sender: []
             })
             const item = await Item.create({
+                author,
                 name,
                 imgSrc,
                 likes,
@@ -71,7 +76,6 @@ router.get(
             const id = req.params.id;
             const items = await Collection.findOne({_id: id}, "items").populate("items");
             //todo зарефачить , не получаю на фронте Likes and tags
-            console.log(items)
             return res.json(items.items.map((item) => ({
                 id: item._id,
                 name: item.name,
@@ -93,6 +97,7 @@ router.get(
             const items = await Item.find().populate("likes").populate("tags");
             return res.json(items.map((item) => ({
                 id: item._id,
+                author: item.author,
                 name: item.name,
                 imgSrc: item.imgSrc,
                 date: item.date,
@@ -113,6 +118,7 @@ router.get(
             const item = await Item.findOne({_id: id}).populate("tags").populate("comments").populate("likes");
             return res.json({
                 id: item._id,
+                author: item.author,
                 name: item.name,
                 imgSrc: item.imgSrc,
                 date: item.date,

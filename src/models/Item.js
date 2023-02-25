@@ -1,6 +1,7 @@
 const {Schema, model} = require('mongoose');
 
 const schema = new Schema({
+    author: {type: Object, required: true},
     name: {type: String, required: true},
     imgSrc: {type: String},
     date: {type: String, required: true},
