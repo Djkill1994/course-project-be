@@ -23,32 +23,19 @@ router.put(
             const {name, imgSrc, tags} = req.body;
             const id = req.params.id;
             const author = await User.findOne({collections: id}, ["userName", "avatarSrc"])
-            // let user = users.find(item => item.id == 1)
-            // (
-            //     { awards: { $elemMatch: { award: "Turing Award", year: { $gt: 1980 } } } }
-            // )
-            // const test = async (tag) => {
-            //     !!await Tag.findOne({tag})
-            // };
-            // const ttt = async (tags) => {
-            //     await Tag.updateOne({_id: tags._id}, {$set: {count: tags.count + 1}})
-            // }
-            // const eee = async (tag) => {
-            //     await Tag.create({tag})
-            // }
 
-            // tags.forEach(({tag}) => {
-            //     if (test(tag)) {
-            //         console.log(tag)
-            //         return ttt(tags)
-            //     } else {
-            //         return eee(tag)
-            //     }
-            // })
+            await Promise.all(tags.map(async (tag) => {
+                console.log(tag)
+                if (!!await Tag.findOne({tag: tag})) {
+                    return (await Tag.updateOne({tag: tag}, {$inc: {count: 1}}))
+                } else {
+                    return (await Tag.create({tag, count: 1}));
+                }
+            }));
 
-            // let resa = await Tag.find();
-            //
-            // console.log(resa)
+            const dbTags = await Tag.find({tag: {$in: tags}});
+
+            console.log(dbTags)
 
             const likes = await Like.create({
                 count: 0,
@@ -57,6 +44,7 @@ router.put(
             const item = await Item.create({
                 author,
                 name,
+                tags: dbTags,
                 imgSrc,
                 likes,
                 date: new Date().toLocaleString("en-US", {timeZone: "Europe/Minsk"})
@@ -64,6 +52,7 @@ router.put(
             await Collection.updateOne({_id: id}, {$push: {items: item}});
             return res.status(200).json({message: 'Item was created.'});
         } catch (error) {
+            console.log(error)
             res.status(500).json({message: 'Create my item error', error});
         }
     }
@@ -111,6 +100,26 @@ router.get(
 );
 
 router.get(
+    '/portion',
+    async (req, res) => {
+        try {
+            const items = await Item.find().sort({date: -1}).limit(10).populate("likes").populate("tags");
+            return res.json(items.map((item) => ({
+                id: item._id,
+                author: item.author,
+                name: item.name,
+                imgSrc: item.imgSrc,
+                date: item.date,
+                tags: item.tags,
+                likes: item.likes
+            })));
+        } catch (error) {
+            res.status(500).json({message: 'Get my items error', error});
+        }
+    }
+);
+
+router.get(
     '/:id',
     async (req, res) => {
         try {
@@ -140,9 +149,38 @@ router.get(
             return res.json(tags.map((tag) => ({
                 id: tag._id,
                 tag: tag.tag,
+                count: tag.count
             })));
         } catch (error) {
             res.status(500).json({message: 'Get tags error', error});
+        }
+    }
+);
+
+router.get(
+    '/tag/:id',
+    async (req, res) => {
+        try {
+            const id = req.params.id;
+            const cursor = await Item.find({
+                tags: {$all: [id]}
+            });
+            const items = await Promise.all(cursor.map(({_id}) => {
+                return Item.findOne({_id: _id}).populate("tags").populate("comments").populate("likes");
+            }))
+
+            console.log(items.map((e) => e.tags))
+            return res.json(items.map((item) => ({
+                id: item._id,
+                author: item.author,
+                name: item.name,
+                imgSrc: item.imgSrc,
+                date: item.date,
+                tags: item.tags,
+                likes: item.likes
+            })));
+        } catch (error) {
+            res.status(500).json({message: 'Get found tag error', error});
         }
     }
 );

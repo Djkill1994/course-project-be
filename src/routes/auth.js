@@ -118,7 +118,7 @@ router.get(
             if (!currentUser) {
                 return res.status(401).json({message: 'Your account has just been deleted.'});
             }
-
+//todo разобратся с collections
             return res.json({
                 id: currentUser._id,
                 userName: currentUser.userName,
@@ -126,6 +126,7 @@ router.get(
                 email: currentUser.email,
                 avatarSrc: currentUser.avatarSrc,
                 role: currentUser.role,
+                collections: currentUser.collections
             });
         } catch (error) {
             res.status(500).json({message: 'Refresh error', error});

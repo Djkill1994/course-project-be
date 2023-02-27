@@ -98,12 +98,6 @@ router.get(
     }
 );
 
-// tags: item.tags.map((tag) => ({
-//     id: tag._id,
-//     tag: tag.tag
-// }))
-
-
 router.get(
     '/all/collection',
     async (req, res) => {
