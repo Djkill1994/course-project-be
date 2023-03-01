@@ -21,7 +21,6 @@ router.put(
                 });
             }
             const {name, imgSrc, tags, optionalFields} = req.body;
-            console.log(optionalFields)
             const id = req.params.id;
             const author = await User.findOne({collections: id}, ["userName", "avatarSrc"])
             await Promise.all(tags.map(async (tag) => {
@@ -82,15 +81,25 @@ router.get(
     '/all',
     async (req, res) => {
         try {
-            const items = await Item.find().populate("likes").populate("tags");
+            const {search} = req.query;
+            const items = search ? await Item.aggregate([
+                {
+                    '$search': {
+                        'index': 'default',
+                        'text': {
+                            'query': search,
+                            'path': {
+                                'wildcard': '*'
+                            }
+                        }
+                    }
+                }
+            ]) : await Item.find();
             return res.json(items.map((item) => ({
                 id: item._id,
                 author: item.author,
                 name: item.name,
                 imgSrc: item.imgSrc,
-                date: item.date,
-                tags: item.tags,
-                likes: item.likes
             })));
         } catch (error) {
             res.status(500).json({message: 'Get my items error', error});
@@ -168,7 +177,6 @@ router.get(
                 return Item.findOne({_id: _id}).populate("tags").populate("comments").populate("likes");
             }))
 
-            console.log(items.map((e) => e.tags))
             return res.json(items.map((item) => ({
                 id: item._id,
                 author: item.author,

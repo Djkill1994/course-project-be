@@ -3,6 +3,8 @@ const {check, validationResult} = require('express-validator');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Collection = require("../models/Collection");
+const Item = require("../models/Item");
+const Comment = require("../models/Comment");
 const authMiddleware = require("../middlewares/auth");
 const router = Router();
 
@@ -42,10 +44,10 @@ router.put(
 );
 
 router.get(
-    '/',
+    '/:userId',
     async (req, res) => {
         try {
-            const currentUser = await User.findOne({_id: jwt.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET).userId}).populate("collections");
+            const currentUser = await User.findOne({_id: req.params.userId}).populate("collections");
             const userCollections = currentUser.collections;
             return res.json(userCollections.map((collection) => ({
                 id: collection._id,
@@ -62,7 +64,7 @@ router.get(
 );
 
 router.get(
-    '/:id',
+    '/one/:id',
     async (req, res) => {
         try {
             const id = req.params.id;
@@ -113,7 +115,7 @@ router.get(
 router.put('/settings/:id', authMiddleware, async (req, res) => {
     try {
         const id = req.params.id;
-        const {name, fields, optionalFields, imgSrc, description, theme} = req.body;
+        const {name, optionalFields, imgSrc, description, theme} = req.body;
         await Collection.updateMany({_id: id}, {
             $set: {
                 name: name,
@@ -133,6 +135,10 @@ router.put('/settings/:id', authMiddleware, async (req, res) => {
 router.delete('/', authMiddleware, async (req, res) => {
     try {
         const {id} = req.body;
+        // todo удалить коменты и лайки также на удалении одного айтема
+        const collection = await Collection.findOne({_id: id}).populate({path: "items", populate:[{path: "comments", model: "Comment"}]})
+        await Item.deleteMany({_id: collection.items.map(({_id}) => _id)});
+        collection.items.map(({comments}) => Comment.deleteMany({_id: [...comments.map(({_id}) => _id)]}));
         await Collection.deleteOne({_id: id});
         res.status(200).json({message: 'Collection has been deleted.'});
     } catch (error) {
