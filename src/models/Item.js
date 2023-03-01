@@ -12,6 +12,7 @@ const schema = new Schema({
     tags: [
         {type: Schema.Types.ObjectId, ref: 'Tag'}
     ],
+    optionalFields: [{type: Object}]
 });
 
 module.exports = model('Item', schema);

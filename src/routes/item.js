@@ -20,12 +20,11 @@ router.put(
                     errors: errors.array(),
                 });
             }
-            const {name, imgSrc, tags} = req.body;
+            const {name, imgSrc, tags, optionalFields} = req.body;
+            console.log(optionalFields)
             const id = req.params.id;
             const author = await User.findOne({collections: id}, ["userName", "avatarSrc"])
-
             await Promise.all(tags.map(async (tag) => {
-                console.log(tag)
                 if (!!await Tag.findOne({tag: tag})) {
                     return (await Tag.updateOne({tag: tag}, {$inc: {count: 1}}))
                 } else {
@@ -35,7 +34,6 @@ router.put(
 
             const dbTags = await Tag.find({tag: {$in: tags}});
 
-            console.log(dbTags)
 
             const likes = await Like.create({
                 count: 0,
@@ -43,6 +41,7 @@ router.put(
             })
             const item = await Item.create({
                 author,
+                optionalFields,
                 name,
                 tags: dbTags,
                 imgSrc,
@@ -52,25 +51,25 @@ router.put(
             await Collection.updateOne({_id: id}, {$push: {items: item}});
             return res.status(200).json({message: 'Item was created.'});
         } catch (error) {
-            console.log(error)
             res.status(500).json({message: 'Create my item error', error});
         }
     }
 );
-// todo придумать как получпть юзера публикации, перенести в коллекцию роут, реализовать получение тэгов
+// todo перенести в коллекцию роут
 router.get(
     '/all/:id',
     async (req, res) => {
         try {
             const id = req.params.id;
-            const items = await Collection.findOne({_id: id}, "items").populate("items");
-            //todo зарефачить , не получаю на фронте Likes and tags
+            const items = await Collection.findOne({_id: id}, "items").populate({path: "items", populate:[{path: "tags", model: "Tag"}, {path: "likes", model: "Like"}]})
+
             return res.json(items.items.map((item) => ({
                 id: item._id,
                 name: item.name,
+                optionalFields: item.optionalFields,
                 imgSrc: item.imgSrc,
                 date: item.date,
-                tags: item.tags,
+                tags: item.tags.map(({_id, tag}) => { return {id: _id, tag: tag}}),
                 likes: item.likes
             })));
         } catch (error) {

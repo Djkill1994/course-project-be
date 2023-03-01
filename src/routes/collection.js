@@ -24,18 +24,11 @@ router.put(
             }
 
             const currentUser = await User.findOne({_id: jwt.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET).userId});
-            const {name, theme, description, imgSrc} = req.body;
+            const {name, theme, description, imgSrc, optionalFields} = req.body;
             const collection = await Collection.create({
                 name,
                 theme,
-                fields: [
-                    {name: "name", type: "string", minLength: 2, maxLength: 50},
-                    {name: "images", type: "string"},
-                    {name: "comments", type: "string", minLength: 2, maxLength: 240},
-                    {name: "tags", type: "string", minLength: 2, maxLength: 50},
-                    {name: "likes", type: "string", minLength: 2, maxLength: 240},
-                ],
-                optionalFields: [],
+                optionalFields,
                 description,
                 imgSrc,
                 date: new Date().toLocaleString("en-US", {timeZone: "Europe/Minsk"})
@@ -73,8 +66,8 @@ router.get(
     async (req, res) => {
         try {
             const id = req.params.id;
-            const collection = await Collection.findOne({_id: id}).populate("items");
-            // todo зарефачить получение liles and tags
+            const collection = await Collection.findOne({_id: id}).populate({path: "items", populate:[{path: "tags", model: "Tag"}]})
+
             return res.json({
                 id: collection._id,
                 name: collection.name,
@@ -87,9 +80,9 @@ router.get(
                 items: collection.items.map((item) => ({
                     id: item._id,
                     name: item.name,
+                    optionalFields: item.optionalFields,
                     imgSrc: item.imgSrc,
-                    tags: item.tags,
-                    likes: item.likes
+                    tags: item.tags.map(({_id, tag}) => { return {id: _id, tag: tag}}),
                 })),
             });
         } catch (error) {
@@ -124,7 +117,6 @@ router.put('/settings/:id', authMiddleware, async (req, res) => {
         await Collection.updateMany({_id: id}, {
             $set: {
                 name: name,
-                fields: fields,
                 optionalFields: optionalFields,
                 imgSrc: imgSrc,
                 description: description,
