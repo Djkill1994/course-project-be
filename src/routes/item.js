@@ -82,24 +82,13 @@ router.get(
     async (req, res) => {
         try {
             const {search} = req.query;
-            const items = search ? await Item.aggregate([
-                {
-                    '$search': {
-                        'index': 'default',
-                        'text': {
-                            'query': search,
-                            'path': {
-                                'wildcard': '*'
-                            }
-                        }
-                    }
-                }
-            ]) : await Item.find();
+            const items = await Item.find({search});
             return res.json(items.map((item) => ({
                 id: item._id,
                 author: item.author,
                 name: item.name,
                 imgSrc: item.imgSrc,
+                tags: item.tags
             })));
         } catch (error) {
             res.status(500).json({message: 'Get my items error', error});
@@ -141,7 +130,8 @@ router.get(
                 date: item.date,
                 tags: item.tags,
                 comments: item.comments,
-                likes: item.likes
+                likes: item.likes,
+                optionalFields: item.optionalFields
             });
         } catch (error) {
             res.status(500).json({message: 'Get my item error', error});

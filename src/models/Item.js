@@ -1,4 +1,5 @@
 const {Schema, model} = require('mongoose');
+const atlasPlugin = require('mongoose-atlas-search');
 
 const schema = new Schema({
     author: {type: Object, required: true},
@@ -15,7 +16,25 @@ const schema = new Schema({
     optionalFields: [{type: Object}]
 });
 
-module.exports = model('Item', schema);
+const ItemModel = model('Item', schema);
+
+atlasPlugin.initialize({
+    model: ItemModel,
+    overwriteFind: true,
+    searchKey: 'search',
+    searchFunction: query => {
+        return {
+            'wildcard': {
+                'query': `${query}*`,
+                'path': ['name', 'author.userName', 'optionalFields.name', 'optionalFields.value', 'comments.comment', 'tags.tag'],
+                'allowAnalyzedField': true
+            }
+        }
+    }
+
+});
+
+module.exports = ItemModel;
 
 
 
