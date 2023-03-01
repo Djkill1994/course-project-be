@@ -135,7 +135,6 @@ router.put('/settings/:id', authMiddleware, async (req, res) => {
 router.delete('/', authMiddleware, async (req, res) => {
     try {
         const {id} = req.body;
-        // todo удалить коменты и лайки также на удалении одного айтема
         const collection = await Collection.findOne({_id: id}).populate({path: "items", populate:[{path: "comments", model: "Comment"}]})
         await Item.deleteMany({_id: collection.items.map(({_id}) => _id)});
         collection.items.map(({comments}) => Comment.deleteMany({_id: [...comments.map(({_id}) => _id)]}));

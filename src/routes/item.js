@@ -54,7 +54,7 @@ router.put(
         }
     }
 );
-// todo перенести в коллекцию роут
+
 router.get(
     '/all/:id',
     async (req, res) => {
@@ -230,7 +230,6 @@ router.put('/like/:id', authMiddleware, async (req, res) => {
     try {
         const id = req.params.id;
         const {sender} = req.body;
-//todo зарефачить код
         const like = await Item.findOne({_id: id}, "likes").populate("likes");
         await Like.updateOne({_id: like.likes._id}, {$inc: {count: 1}});
         await Like.updateOne({_id: like.likes._id}, {$push: {sender: sender}});
@@ -246,7 +245,6 @@ router.put('/unLike/:id', authMiddleware, async (req, res) => {
     try {
         const id = req.params.id;
         const {sender} = req.body;
-//todo зарефачить код
         const like = await Item.findOne({_id: id}, "likes").populate("likes");
         await Like.updateOne({_id: like.likes._id}, {$inc: {count: -1}});
         await Like.updateOne({_id: like.likes._id}, {$unset: {sender: sender}});
@@ -261,6 +259,8 @@ router.put('/unLike/:id', authMiddleware, async (req, res) => {
 router.delete('/', authMiddleware, async (req, res) => {
     try {
         const {id} = req.body;
+        const item = await Item.findOne({_id: id}).populate('comments');
+        Comment.deleteMany({_id : item.comments.map(({_id}) => _id)});
         await Item.deleteMany({_id: id});
         res.status(200).json({message: 'Item has been deleted.'});
     } catch (error) {

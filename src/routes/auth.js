@@ -29,7 +29,7 @@ router.post(
                     message: 'Sorry, but your passwords do not match, be careful.',
                 });
             }
-//todo сделать отдельно проверки и ошибки на email and userName
+
             const isUserAlreadyExists = !!await User.findOne({email} && {userName});
 
             if (isUserAlreadyExists) {
@@ -118,7 +118,6 @@ router.get(
             if (!currentUser) {
                 return res.status(401).json({message: 'Your account has just been deleted.'});
             }
-//todo разобратся с collections
             return res.json({
                 id: currentUser._id,
                 userName: currentUser.userName,
