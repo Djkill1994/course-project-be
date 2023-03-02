@@ -6,6 +6,8 @@ const Collection = require("../models/Collection");
 const Item = require("../models/Item");
 const Comment = require("../models/Comment");
 const authMiddleware = require("../middlewares/auth");
+const Theme = require("../models/Theme");
+const Like = require("../models/Like");
 const router = Router();
 
 router.put(
@@ -39,6 +41,22 @@ router.put(
             return res.status(200).json({message: 'Collection was created.'});
         } catch (error) {
             res.status(500).json({message: 'Create my collection error', error});
+        }
+    }
+);
+
+router.get(
+    '/themes',
+    async (req, res) => {
+        try {
+            const themes = await Theme.find();
+            console.log(themes)
+            return res.json(themes.map((theme) => ({
+                id: theme._id,
+                theme: theme.theme
+            })));
+        } catch (error) {
+            res.status(500).json({message: 'Get themes error', error});
         }
     }
 );
