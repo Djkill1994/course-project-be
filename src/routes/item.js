@@ -267,8 +267,6 @@ router.put('/unLike/:id', authMiddleware, async (req, res) => {
 router.delete('/', authMiddleware, async (req, res) => {
   try {
     const {id} = req.body;
-    const item = await Item.findOne({_id: id});
-    Comment.deleteMany({_id: item.comments.map(({_id}) => _id)});
     await Item.deleteMany({_id: id});
     res.status(200).json({message: 'Item has been deleted.'});
   } catch (error) {
