@@ -6,8 +6,10 @@ const schema = new Schema({
     name: {type: String, required: true},
     imgSrc: {type: String},
     date: {type: String, required: true},
-    comments: [
-        {type: Schema.Types.ObjectId, ref: 'Comment'}
+    comments: [{
+        sender: {type: Object, required: true},
+        comment: {type: String, required: true},
+        date: {type: String, required: true}}
     ],
     likes: {type: Schema.Types.ObjectId, ref: 'Like'},
     tags: [
