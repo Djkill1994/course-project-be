@@ -215,15 +215,17 @@ router.put(
 router.put('/settings/:id', authMiddleware, async (req, res) => {
   try {
     const id = req.params.id;
-    const {
-      name, imgSrc, tags
-    } = req.body;
-    await Item.updateMany({_id: id}, {
-      $set: {
-        name: name,
-        imgSrc: imgSrc,
-        tags: tags
+    const data = req.body;
+    await Promise.all(data.tags.map(async (tag) => {
+      if (!!await Tag.findOne({tag: tag})) {
+        return (await Tag.updateOne({tag: tag}, {$inc: {count: 1}}))
+      } else {
+        return (await Tag.create({tag, count: 1}));
       }
+    }));
+    const dbTags = await Tag.find({tag: {$in: req.body.tags}})
+    await Item.updateMany({_id: id}, {
+      $set: {...data, tags: dbTags}
     })
 
     res.status(200).json({message: 'You have update an item settings.'});
