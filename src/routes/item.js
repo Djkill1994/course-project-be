@@ -21,7 +21,7 @@ router.put(
             }
             const {name, imgSrc, tags, optionalFields} = req.body;
             const id = req.params.id;
-            const author = await User.findOne({collections: id}, ["userName", "avatarSrc"])
+            const author = await User.findOne({collections: id}, ["userName", "avatarSrc"]);
             await Promise.all(tags.map(async (tag) => {
                 if (!!await Tag.findOne({tag: tag})) {
                     return (await Tag.updateOne({tag: tag}, {$inc: {count: 1}}))
@@ -36,7 +36,7 @@ router.put(
             const likes = await Like.create({
                 count: 0,
                 sender: []
-            })
+            });
             const item = await Item.create({
                 author,
                 optionalFields: optionalFields.map((optionalField) => ({
@@ -48,7 +48,7 @@ router.put(
                 imgSrc,
                 likes,
                 date: new Date().toLocaleString("en-US", {timeZone: "Europe/Minsk"})
-            })
+            });
             await Collection.updateOne({_id: id}, {$push: {items: item}});
             return res.status(200).json({message: 'Item was created.'});
         } catch (error) {
@@ -65,7 +65,7 @@ router.get(
             const items = await Collection.findOne({_id: id}, "items").populate({
                 path: "items",
                 populate: [{path: "tags", model: "Tag"}, {path: "likes", model: "Like"}]
-            })
+            });
 
             return res.json(items.items.map((item) => ({
                 id: item._id,
@@ -174,7 +174,7 @@ router.get(
             });
             const items = await Promise.all(cursor.map(({_id}) => {
                 return Item.findOne({_id: _id}).populate("tags").populate("likes");
-            }))
+            }));
 
             return res.json(items.map((item) => ({
                 id: item._id,
@@ -231,7 +231,7 @@ router.put('/settings/:id', authMiddleware, async (req, res) => {
         const dbTags = await Tag.find({tag: {$in: req.body.tags}})
         await Item.updateMany({_id: id}, {
             $set: {...data, tags: dbTags}
-        })
+        });
 
         res.status(200).json({message: 'You have update an item settings.'});
     } catch (error) {
@@ -265,7 +265,7 @@ router.put('/unLike/:id', authMiddleware, async (req, res) => {
         res.status(200).json({message: 'You have like.'});
     } catch
         (error) {
-        res.status(500).json({message: 'Like error', error});
+        res.status(500).json({message: 'UnLike error', error});
     }
 });
 

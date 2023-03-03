@@ -34,7 +34,7 @@ router.put(
         description,
         imgSrc,
         date: new Date().toLocaleString("en-US", {timeZone: "Europe/Minsk"})
-      })
+      });
       await User.updateOne({_id: currentUser}, {$push: {collections: collection}});
       return res.status(200).json({message: 'Collection was created.'});
     } catch (error) {
@@ -86,7 +86,7 @@ router.get(
       const collection = await Collection.findOne({_id: id}).populate({
         path: "items",
         populate: [{path: "tags", model: "Tag"}]
-      })
+      });
 
       return res.json({
         id: collection._id,
@@ -145,24 +145,24 @@ router.put('/settings/:id', authMiddleware, async (req, res) => {
         description: description,
         theme: theme
       }
-    })
+    });
 
     res.status(200).json({message: 'You have update an collection settings.'});
   } catch (error) {
     res.status(500).json({message: 'Update collection settings error', error});
   }
-})
+});
 
 router.delete('/', authMiddleware, async (req, res) => {
   try {
     const {id} = req.body;
-    const collection = await Collection.findOne({_id: id}).populate({path: "items"})
+    const collection = await Collection.findOne({_id: id}).populate({path: "items"});
     await Item.deleteMany({_id: collection.items.map(({_id}) => _id)});
     await Collection.deleteOne({_id: id});
     res.status(200).json({message: 'Collection has been deleted.'});
   } catch (error) {
     res.status(500).json({message: 'Delete collection error', error});
   }
-})
+});
 
 module.exports = router;

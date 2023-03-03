@@ -47,7 +47,7 @@ router.post(
       await user.save();
       return res.status(200).json({message: 'User was created.'});
     } catch (e) {
-      res.status(500).json({message: 'Some magic happened, please try again to perform the actions you have done, thank you.'});
+      res.status(500).json({message: 'Error creating user, please try again.'});
     }
   }
 );
@@ -93,7 +93,7 @@ router.post(
       await currentUser.save();
       res.json({token, record: {...currentUser, id: currentUser._id}});
     } catch (e) {
-      res.status(500).json({message: 'Some magic happened, please try again to perform the actions you have done, thank you.'});
+      res.status(500).json({message: 'Error login user, please try again.'});
     }
   }
 );

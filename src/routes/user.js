@@ -19,7 +19,7 @@ router.put(
 
             const currentUser = await User.findOne({_id: jwt.verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET).userId});
             const {userName, email, avatarSrc} = req.body;
-            await User.updateMany({_id: currentUser}, {$set: {userName: userName, email: email, avatarSrc: avatarSrc}})
+            await User.updateMany({_id: currentUser}, {$set: {userName: userName, email: email, avatarSrc: avatarSrc}});
             return res.status(200).json({message: 'Profile editing.'});
         } catch (error) {
             res.status(500).json({message: 'Profile editing error', error});
